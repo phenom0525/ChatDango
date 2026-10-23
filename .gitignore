@@ -1,0 +1,14 @@
+data/
+node_modules/
+*.log
+.claude/
+.agents/
+
+*.bak
+*.bak_*
+index.html.bak*
+
+.env
+.env.*
+*.pem
+*.key

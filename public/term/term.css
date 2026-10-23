@@ -1,0 +1,12 @@
+#tpane{flex:none;height:36vh;min-height:140px;display:flex;flex-direction:column;margin:0 14px 8px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.16);background:rgba(8,12,18,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+#tpane[hidden]{display:none}#tpane.big{height:70vh}
+#thead{display:flex;align-items:center;gap:8px;padding:5px 10px;font-size:12px;color:#cbd5e1;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05)}
+#thead b{font-size:12px}#tcwd{color:#94a3b8;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:50%}
+#thead button{width:26px;height:24px;padding:0;border-radius:7px;font-size:12px}
+#tterm{flex:1;min-height:0;position:relative;padding:6px 8px}.tt{position:absolute;inset:6px 8px}
+#tpane .xterm-viewport{background:transparent!important}
+#tbtn.on{background:rgba(6,199,85,.3)!important}
+@media (max-width:760px){#tpane{margin:0 8px 6px}}
+#ttabs { display: inline-flex; gap: 3px; margin-left: 8px; }
+.ttab { white-space: nowrap; font: inherit; font-size: 11px; padding: 1px 9px; border-radius: 7px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); background: transparent; color: inherit; cursor: pointer; opacity: .7; }
+.ttab.on { opacity: 1; background: color-mix(in srgb, currentColor 16%, transparent); }

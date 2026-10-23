@@ -1,0 +1,4 @@
+yomiyasu v2.0.1 (https://github.com/nanaism/yomiyasu/releases/tag/v2.0.1)
+MIT License / Copyright (c) 2026 nanaism
+そのまま同梱しています(LICENSE と UNICODE-LICENSE.txt も一緒に配布してください)。
+zip sha256: b0014c54b191ab27b93b0122971ad8382da8442078367912429166c140a666d8

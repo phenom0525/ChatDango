@@ -1,0 +1,27 @@
+{
+  "name": "chatdango",
+  "version": "0.1.0",
+  "description": "Claude Code / Codex を LINE のようなチャット画面で使うローカルアプリ(依存パッケージなし)",
+  "private": true,
+  "license": "MIT",
+  "os": [
+    "win32"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/connections.test.js test/security.test.js test/theme.test.js test/http.test.js test/hl.test.js test/scheduler.test.js test/files.test.js test/yomiyasu.test.js test/md.test.js test/msgsearch.test.js test/checkpoint.test.js test/worktree.test.js test/sysstat.test.js test/tasks.test.js test/skills.test.js test/skillsrc.test.js test/tts.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PONTAMUX/chatdango.git"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "chat-ui",
+    "local"
+  ]
+}
