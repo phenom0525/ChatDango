@@ -1,6 +1,6 @@
 # ChatDango
 
-![ChatDango](docs/banner.png)
+<p align="center"><img src="docs/banner.png" alt="ChatDango" width="420"></p>
 
 Claude Code と Codex を、LINE のようなチャット画面で使うローカルアプリです。
 会話に名前を付けて並べて管理でき、続きから話すと自動で resume(再開)されます。
