@@ -8,6 +8,8 @@ PC のブラウザだけでなく、スマホ(Tailscale 経由)からも使え�
 
 依存パッケージはありません。Node.js だけで動きます。
 
+[▶ 紹介動画(約4分・音声あり)](docs/ChatDango_intro.mp4)
+
 ![チャット画面](docs/chat.png)
 
 ![変更の差分とコミット](docs/work-diff.png)
