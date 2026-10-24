@@ -1,9 +1,5 @@
 # ChatDango
 
-
-https://github.com/user-attachments/assets/06bed73d-c021-4320-85b3-ee02968d075b
-
-
 <p align="center"><img src="docs/banner.png" alt="ChatDango" width="420"></p>
 
 Claude Code と Codex を、LINE のようなチャット画面で使うローカルアプリです。
@@ -12,9 +8,9 @@ PC のブラウザだけでなく、スマホ(Tailscale 経由)からも使え�
 
 依存パッケージはありません。Node.js だけで動きます。
 
-<video src="https://github.com/phenom0525/ChatDango/raw/main/docs/ChatDango_intro.mp4" controls width="720"></video>
+https://github.com/user-attachments/assets/06bed73d-c021-4320-85b3-ee02968d075b
 
-[紹介動画をダウンロード(約4分・音声あり)](docs/ChatDango_intro.mp4)
+> 紹介動画(約4分)。音声: VOICEVOX:ずんだもん / 動画内で紹介している yomiyasu は nanaism さんの作品です。
 
 ![チャット画面](docs/chat.png)
 
