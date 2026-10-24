@@ -8,13 +8,11 @@ PC のブラウザだけでなく、スマホ(Tailscale 経由)からも使え�
 
 依存パッケージはありません。Node.js だけで動きます。
 
-https://github.com/user-attachments/assets/06bed73d-c021-4320-85b3-ee02968d075b
+<p align="center"><video src="https://github.com/user-attachments/assets/06bed73d-c021-4320-85b3-ee02968d075b" controls width="640"></video></p>
 
 > 紹介動画(約4分)。音声: VOICEVOX:ずんだもん / 動画内で紹介している yomiyasu は nanaism さんの作品です。
 
-![チャット画面](docs/chat.png)
-
-![変更の差分とコミット](docs/work-diff.png)
+<p align="center"><img src="docs/chat.png" alt="チャット画面" width="48%"> <img src="docs/work-diff.png" alt="変更の差分とコミット" width="48%"></p>
 
 > 画像は、デモ用の空のフォルダと架空の会話で撮ったものです。
 
