@@ -1,5 +1,9 @@
 # ChatDango
 
+
+https://github.com/user-attachments/assets/06bed73d-c021-4320-85b3-ee02968d075b
+
+
 <p align="center"><img src="docs/banner.png" alt="ChatDango" width="420"></p>
 
 Claude Code と Codex を、LINE のようなチャット画面で使うローカルアプリです。
