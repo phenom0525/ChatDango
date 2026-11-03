@@ -129,6 +129,7 @@ button.danger{color:#ef4444}
 .bub table{border-collapse:collapse;display:block;overflow:auto;max-width:100%}.bub th,.bub td{border:1px solid rgba(127,127,127,.45);padding:3px 8px;text-align:left}.bub th{background:rgba(127,127,127,.2)}
 .bub mark{background:#fde047;color:#111;border-radius:3px;padding:0 2px}
 .bub a{color:#2563eb}@media (prefers-color-scheme:dark){.bub a{color:#93c5fd}}
+#msgs .pv{display:flex;flex-direction:column;gap:6px;margin-top:8px}.pv .pvc{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pv .pvb{padding:4px 10px;font-size:12px;cursor:pointer}.pv .pvo{font-size:11px}.pv iframe.pvf{width:100%;height:420px;border:1px solid var(--line);border-radius:8px;background:#fff;resize:vertical}
 img.att{max-width:100%;max-height:320px;border-radius:8px;cursor:zoom-in;display:block}
 #slash{position:absolute;left:14px;right:14px;bottom:0;max-height:260px;overflow:auto;background:var(--side);border:1px solid var(--line);border-radius:10px;box-shadow:0 -4px 16px rgba(0,0,0,.18);z-index:20;padding:4px}
 #slash .si{padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px}#slash .si.on{background:var(--line)}#slash .si b{font-weight:600}#slash .si span{display:block;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -218,7 +219,7 @@ dialog .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 .sklist .sk .h{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.sklist .sk .nm{font-weight:700;font-size:14px;color:var(--txt);margin-right:4px}.sklist .sk .ver{font-size:11px;color:#16a34a;margin-left:4px}
 .sklist .sk .d{color:var(--txt);opacity:.85;font-size:12px;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}.sklist .sk.open .d{-webkit-line-clamp:unset}
 .sklist .sk .src{font-size:11px;color:var(--sub);margin-top:4px;word-break:break-all}.sklist .sk .src a{color:#4da3ff;text-decoration:underline}.sklist .sk .src em{font-style:normal;color:#f59e0b}
-.sklist .sk .n{font-size:11px;color:var(--sub);margin-top:4px}.sklist .sk .n.ok{color:#16a34a}.sklist .sk .n.err{color:#ef4444}
+.sklist .sk .n{font-size:11px;color:var(--sub);margin-top:4px}.sklist .sk .n.ok{color:#16a34a}.sklist .sk .n.err{color:#ef4444}.sklist .sk .n.new{color:#d97706;font-weight:700}
 .sklist .sk .p{color:var(--sub);opacity:.75;font-family:ui-monospace,Consolas,monospace;font-size:10.5px;margin-top:4px;word-break:break-all}
 .sklist .sk button{padding:3px 10px;font-size:12px}.sklist .sk .h button.up{font-size:13px;padding:4px 12px}
 .sklist .sk .h button.up[data-act=update]{background:#16a34a;border:1px solid #16a34a;color:#fff;font-weight:700;padding:6px 16px;border-radius:8px;box-shadow:0 2px 8px rgba(22,163,74,.35);cursor:pointer}.sklist .sk .h button.up[data-act=update]::before{content:'⟳ '}.sklist .sk .h button.up[data-act=update]:hover{background:#15803d}.sklist .sk .h button.up[data-act=update]:disabled{opacity:.6;cursor:default}
@@ -454,7 +455,10 @@ select,select option,select optgroup{background-color:var(--side)!important;colo
     <label>MCP (ブラウザ操作・Gmail等。Claudeのみ)</label><select id="f-mcp"><option value="auto">自動 (必要な依頼が来たときだけ有効。普段はトークン節約)</option><option value="on">常に使う</option><option value="off">使わない</option></select>
   <label id="f-fmtlbl" style="display:flex;gap:6px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="f-fmt" style="width:auto;margin-top:3px"><span>チャット表示用の書式指示をAIに伝える<br><span style="font-size:11px">Markdown・コードブロックで返してもらう</span></span></label>
   <label id="f-yylbl" style="display:flex;gap:6px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="f-yy" style="width:auto;margin-top:3px"><span>yomiyasu(日本語の推敲スキル)をこの作業フォルダで使う<br><span style="font-size:11px">「読みやすく直して」と頼むか /yomiyasu で使えます。補助チェックに Python 3 が必要。外すと入れたコピーを消します。ホームや F:\ のチャットは同じフォルダを使う他のチャットにも効きます</span></span></label>
-  <label id="f-wtlbl" style="display:flex;gap:6px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="f-wt" style="width:auto;margin-top:3px"><span>分離して作業する(worktree)<br><span style="font-size:11px">この会話専用のフォルダとブランチを作ります。同じプロジェクトで他の会話と同時に作業しても、ファイルが混ざりません。終わったら本体へ取り込めます。gitのフォルダで、コミットが1つ以上ある場合だけ使えます。まだコミットしていない変更は、分離先には入りません</span></span></label>
+  <div id="f-autobox" style="margin-top:8px"><label style="display:flex;gap:6px;align-items:flex-start"><input type="checkbox" id="f-auto" style="width:auto;margin-top:3px"><span>自動で続ける(目標達成まで止めない)<br><span style="font-size:11px">AIが返事を終えるたびに「続けて」と自動で送ります。最後の行が【完了】になるか、上限の回数に達するか、停止ボタンを押すと終わります</span></span></label>
+    <div style="display:flex;gap:6px;align-items:center;margin-top:4px;font-size:12px">上限<input type="number" id="f-automax" min="1" max="500" value="30" style="width:70px">回</div>
+    <textarea id="f-autoprompt" rows="2" placeholder="送る文章(空なら「止まらず続けて、完全に達成できたら最後の行に【完了】と書く」という標準の文)" style="width:100%;margin-top:4px;font-size:12px"></textarea></div>
+  <label id="f-wtlbl"style="display:flex;gap:6px;align-items:flex-start;margin-top:8px"><input type="checkbox" id="f-wt" style="width:auto;margin-top:3px"><span>分離して作業する(worktree)<br><span style="font-size:11px">この会話専用のフォルダとブランチを作ります。同じプロジェクトで他の会話と同時に作業しても、ファイルが混ざりません。終わったら本体へ取り込めます。gitのフォルダで、コミットが1つ以上ある場合だけ使えます。まだコミットしていない変更は、分離先には入りません</span></span></label>
   </details>
   <div id="err"></div>
   <div class="btns"><button id="dcancel">キャンセル</button><button class="pri" id="dok">OK</button></div>
@@ -508,6 +512,7 @@ select,select option,select optgroup{background-color:var(--side)!important;colo
     <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap"><button type="button" id="thf-up">フォントファイルを追加…</button><button type="button" id="thf-off">ファイルのフォントを外す</button><input type="file" id="thf-file" accept=".ttf,.otf,.woff,.woff2" hidden><span id="thf-msg" style="font-size:11px;color:var(--sub)"></span></div>
     <div id="thf-list" style="margin-top:6px"></div>
     <div class="sl">チャットの文字サイズ <input type="range" id="th-size" min="12" max="22" step="1"><span class="v" id="th-sizev"></span></div>
+    <div class="sl">画面全体の文字サイズ(PCの広い画面だけ) <input type="range" id="th-ui" min="80" max="200" step="10"><span class="v" id="th-uiv"></span></div>
   </div>
   <div class="card"><h3>背景の画像・動画</h3>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><span class="seg" id="th-scope"><button type="button" data-s="all" class="on">全体</button><button type="button" data-s="chat">この会話だけ</button></span><span id="th-scopen" style="font-size:11px;color:var(--sub)"></span></div>
@@ -521,6 +526,9 @@ select,select option,select optgroup{background-color:var(--side)!important;colo
   <div class="card"><button type="button" id="th-reset">すべて元に戻す</button></div>
   </div>
   <div class="spane" data-p="snd" hidden>
+  <div class="card"><h3>音の出力先(この端末だけの設定)</h3>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px"><select id="out-dev" style="flex:1;min-width:180px"></select><button id="out-reload" type="button">一覧を更新</button><button id="out-test" type="button">試し聴き</button></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px;font-size:11px;color:var(--sub)"><span id="out-msg" style="flex:1">完了音と読み上げの両方が、ここで選んだ出力先から鳴ります。</span><button id="out-names" type="button" hidden>デバイス名を表示</button></div></div>
   <div class="card"><h3>完了音(この端末だけの設定)</h3>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px">
       <select id="snd-kind"><option value="off">鳴らさない</option><option value="chime">チャイム(やさしい)</option><option value="ding">ポン</option><option value="pop">ぽこっ</option><option value="bell">ベル</option><option value="done">ピロリン</option><option value="sparkle">キラッ</option><option value="coin">コイン</option><option value="marimba">木琴</option><option value="double">ポンポン</option><option value="game">ゲーム風</option><option value="custom">自分の音ファイル</option></select>
@@ -550,7 +558,9 @@ select,select option,select optgroup{background-color:var(--side)!important;colo
   </div>
   <div class="spane" data-p="skill" hidden>
     <div style="font-size:12px;color:var(--sub);margin-top:2px">スキル一覧。タグは、そのスキルを使えるツールです(<span class="stag cc">Claude Code</span> <span class="stag cx">Codex</span>)。片方にしかないものは、もう一方へコピーできます。</div>
-    <input id="skq" placeholder="名前や説明で絞り込み" style="margin-top:8px">
+    <div style="display:flex;gap:6px;margin-top:8px"><input id="skq" placeholder="名前や説明で絞り込み" style="flex:1"><button id="skchk" title="取得元に新しい版があるかを確認するだけです(何も入れ替えません)">全部の更新チェック</button></div>
+    <div id="skchkinfo" style="font-size:12px;margin-top:6px"></div>
+    <button id="skall" hidden style="margin-top:6px;background:#16a34a;border:1px solid #16a34a;color:#fff;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer"></button>
     <div id="skfil" class="skfil"></div>
     <div id="skinfo" style="font-size:11px;color:var(--sub);margin-top:6px"></div>
     <div id="sklist" class="sklist"><span style="color:var(--sub);font-size:12px">読み込み中…</span></div>
@@ -959,6 +969,38 @@ function mdp(text) {
   }
   return out + part(text.slice(last));
 }
+// チャット内プレビュー: AIの返事に書かれた画像・PDF・HTMLのパスを、吹き出しの下に出す(AIには何も送らないのでトークンは増えない)
+const PV_RE = /`([^`\n]+?\.(?:png|jpe?g|gif|webp|bmp|svg|pdf|html?))`|((?<![A-Za-z])[A-Za-z]:[\\/][^\s"'`<>|*?　「」()]+?\.(?:png|jpe?g|gif|webp|bmp|svg|pdf|html?))(?![\w])|(?<![\w.\/\\:@%-])((?:\.{0,2}\/)?(?:[^\s"'`<>|*?:　「」()（）\\\/]+\/)*[^\s"'`<>|*?:　「」()（）\\\/]+?\.(?:png|jpe?g|gif|webp|bmp|svg|pdf|html?))(?![\w\/])/gi;
+function pvPaths(text) {
+  const set = new Set(); let m; PV_RE.lastIndex = 0;
+  while ((m = PV_RE.exec(String(text || ''))) && set.size < 12) { const x = (m[1] || m[2] || m[3]).trim(); if (x.length <= 500 && !/^https?:/i.test(x)) set.add(x); }
+  return [...set];
+}
+function pvBlock(text) {
+  const list = pvPaths(text); if (!list.length || !cur) return null;
+  const sid = cur, box = document.createElement('div'); box.className = 'pv';
+  for (const raw of list) {
+    let url = '/api/preview?sid=' + encodeURIComponent(sid) + '&path=' + encodeURIComponent(raw); const ext = (raw.match(/\.(\w+)$/) || [, ''])[1].toLowerCase(), name = raw.split(/[\\/]/).pop();
+    const isImg = !/^(pdf|html?)$/.test(ext), icon = isImg ? '🖼 ' : ext === 'pdf' ? '📄 ' : '🌐 ';
+    const row = document.createElement('div'), bt = document.createElement('button'); row.className = 'pvc'; bt.type = 'button'; bt.className = 'pvb';
+    bt.textContent = icon + name + ' をプレビュー'; bt.title = raw;
+    let fr = null;
+    bt.onclick = () => {
+      if (fr) { fr.remove(); fr = null; bt.textContent = icon + name + ' をプレビュー'; return; }
+      if (isImg) { fr = document.createElement('img'); fr.className = 'att'; fr.alt = name; fr.title = name + '(クリックで拡大)'; }
+      else { fr = document.createElement('iframe'); fr.className = 'pvf'; fr.loading = 'lazy'; if (ext !== 'pdf') fr.setAttribute('sandbox', 'allow-scripts'); } // HTML: 本体のデータに触れない別枠で動かす
+      fr.src = url; row.after(fr); bt.textContent = '✕ ' + name + ' を閉じる';
+    };
+    const op = document.createElement('a'); op.href = url; op.target = '_blank'; op.rel = 'noopener noreferrer'; op.textContent = '別タブで開く'; op.className = 'pvo';
+    row.append(bt, op); box.append(row);
+    const gone = () => { row.remove(); if (!box.children.length) box.remove(); };
+    if (ext === 'html' || ext === 'htm') { // HTML は同じフォルダの画像・CSS・別のHTMLも読めるよう、署名つきのURLをもらう
+      bt.disabled = true;
+      fetch('/api/preview-link?sid=' + encodeURIComponent(sid) + '&path=' + encodeURIComponent(raw)).then(r => r.ok ? r.json() : Promise.reject(), () => Promise.reject()).then(j => { url = j.url; op.href = url; bt.disabled = false; }, gone);
+    } else fetch(url, { method: 'HEAD' }).then(r => { if (!r.ok) gone(); }, () => {});
+  }
+  return box.children.length ? box : null;
+}
 function bubble(m) { const el = bubble0(m); if (m.ts) el.dataset.ts = m.ts; return el; }
 function bubble0(m) {
   const el = document.createElement('div');
@@ -968,6 +1010,7 @@ function bubble0(m) {
   const b = document.createElement('div'); b.className = 'bub';
   const imgs = (m.images || []).map(n => '<img class="att" role="button" tabindex="0" title="画像を拡大" src="/img/' + encodeURIComponent(n) + '">').join('');
   b.innerHTML = imgs + (m.images && m.images.length && m.text === '(画像を添付します)' ? '' : mdp(m.text));
+  if (m.role === 'assistant') { const pv = pvBlock(m.text); if (pv) b.append(pv); }
   const t = document.createElement('span'); t.className = 'ts'; t.textContent = hm(m.ts);
   if (m.id) { // メッセージのピン留め(上のピン一覧からジャンプできる)
     el.dataset.mid = m.id; const pi = pinInfo(m); el.dataset.snip = pi.snip; el.dataset.who = pi.who;
@@ -1382,6 +1425,7 @@ function dlg(s) {
   $('f-tool').disabled = !!s; $('f-cwd').value = s ? s.cwd : (localStorage.cwd || '');
   $('f-perm').value = s ? s.perm : 'safe'; $('f-mcp').value = (s && s.mcp) || 'auto';
   $('f-fmt').checked = s ? s.fmt !== false : localStorage.fmt !== '0'; $('f-yy').checked = s ? !!s.yomiyasu : localStorage.yy === '1'; 
+  $('f-autobox').style.display = s ? '' : 'none'; const au = (s && s.auto) || {}; $('f-auto').checked = !!au.on; $('f-automax').value = au.max || 30; $('f-autoprompt').value = au.prompt || '';
   $('f-usecolor').checked = !!(s && s.color); $('f-color').value = (s && s.color) || '#06c755';
   iconVal = (s && s.icon) || ''; $('f-icon').value = isImgIcon(iconVal) ? '' : iconVal; prevIcon();
   $('f-wt').checked = false; $('f-wtlbl').style.display = s ? 'none' : 'flex';
@@ -1701,7 +1745,7 @@ $('gt').onclick = async e => {
 $('edit').onclick = () => dlg(sessions.find(x => x.id === cur));
 $('dcancel').onclick = () => $('dlg').close();
 $('dok').onclick = async () => {
-  const b = { name: $('f-name').value, tool: $('f-tool').value, cwd: $('f-cwd').value, perm: $('f-perm').value, mcp: $('f-mcp').value, fmt: $('f-fmt').checked, yomiyasu: $('f-yy').checked, worktree: !editing && $('f-wt').checked, color: $('f-usecolor').checked ? $('f-color').value : '', icon: iconVal };
+  const b = { name: $('f-name').value, tool: $('f-tool').value, cwd: $('f-cwd').value, perm: $('f-perm').value, mcp: $('f-mcp').value, fmt: $('f-fmt').checked, yomiyasu: $('f-yy').checked, worktree: !editing && $('f-wt').checked, auto: editing ? { on: $('f-auto').checked, max: $('f-automax').value, prompt: $('f-autoprompt').value } : undefined, color: $('f-usecolor').checked ? $('f-color').value : '', icon: iconVal };
   if (!editing) { b.model = modelOf(); localStorage.aim = $('f-model').value; }
   try {
     if (editing) { const r = await api('POST', `/api/sessions/${editing.id}/rename`, b); if (r && r.note) alert(r.note); }
@@ -2104,12 +2148,43 @@ function renderSkills() {
     const act = g.src ? '<button class="up" data-i="' + idx + '" data-act="update">最新版に更新</button>' : '<button class="up" data-i="' + idx + '" data-act="source">取得元を設定</button>';
     const fd = t => { const d = new Date(t); return isNaN(d) ? '' : d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
     const when = (g.installedAt ? '入れた日: <b>' + fd(g.installedAt) + '</b>' : '') + (g.updatedAt ? '　最終更新: <b>' + fd(g.updatedAt) + '</b>' + (g.updatedBy === 'button' ? '(更新ボタン)' : '(ファイルの更新日)') : '');
-    const m = skMsg[g.name.toLowerCase()];
+    const m = skMsg[g.name.toLowerCase()], ck = skChk[g.name.toLowerCase()];
+    const ckTxt = ck && ck.status !== 'none' ? '<div class="n ' + (ck.status === 'new' ? 'new' : ck.status === 'same' ? 'ok' : ck.status === 'error' ? 'err' : '') + '">' + (ck.status === 'new' ? '⬆ ' : ck.status === 'same' ? '✔ ' : '') + esc4(ck.text) + '</div>' : '';
     const paths = [...new Set(g.places.map(x => x.dir + (x.link ? '(リンク)' : '')))];
-    return '<div class="card sk"><div class="h"><span class="nm">' + esc4(g.name) + '</span>' + tags + (g.version ? '<span class="ver">現在 v' + esc4(g.version) + '</span>' : '') + scopes + '<span style="flex:1"></span>' + btns.join(' ') + act + '</div>' + (g.desc ? '<div class="d" title="クリックで全文">' + esc4(g.desc) + '</div>' : '') + '<div class="src">' + src + '</div>' + (when ? '<div class="n">' + when + '</div>' : '') + (m ? '<div class="n ' + m.cls + '">' + esc4(m.text) + '</div>' : '') + '<div class="p">' + paths.map(esc4).join('<br>') + '</div></div>';
+    return '<div class="card sk"><div class="h"><span class="nm">' + esc4(g.name) + '</span>' + tags + (g.version ? '<span class="ver">現在 v' + esc4(g.version) + '</span>' : '') + scopes + '<span style="flex:1"></span>' + btns.join(' ') + act + '</div>' + (g.desc ? '<div class="d" title="クリックで全文">' + esc4(g.desc) + '</div>' : '') + '<div class="src">' + src + '</div>' + (when ? '<div class="n">' + when + '</div>' : '') + ckTxt + (m ? '<div class="n ' + m.cls + '">' + esc4(m.text) + '</div>' : '') + '<div class="p">' + paths.map(esc4).join('<br>') + '</div></div>';
   }).join('') : '<span style="color:var(--sub)">該当するスキルがありません</span>';
 }
 $('skq').oninput = renderSkills;
+const skChk = {}; // スキル名(小文字) → { status, text }。更新チェックの結果
+$('skchk').onclick = async () => {
+  const b = $('skchk'), info = $('skchkinfo'); b.disabled = true; info.style.color = ''; info.textContent = '確認中…(取得元ごとにGitHubへ問い合わせます)';
+  try {
+    const r = await api('POST', '/api/skills/check', { sid: cur || '' });
+    for (const k of Object.keys(skChk)) delete skChk[k];
+    Object.assign(skChk, r.results || {});
+    const v = Object.values(skChk), c = s => v.filter(x => x.status === s).length;
+    info.style.color = c('new') ? '#d97706' : '#16a34a';
+    info.textContent = '確認しました: 更新あり ' + c('new') + '件 / 最新 ' + c('same') + '件 / 今の版が未確認 ' + c('unknown') + '件 / 取得元なし ' + c('none') + '件' + (c('error') ? ' / 確認できず ' + c('error') + '件' : '') + (c('new') ? '。「更新あり」のスキルの「最新版に更新」を押してください' : '');
+    renderSkills(); showSkAll();
+  } catch (e) { info.style.color = '#ef4444'; info.textContent = '確認できませんでした: ' + (e.message || e); }
+  b.disabled = false;
+};
+const skNew = () => Object.keys(skChk).filter(k => skChk[k].status === 'new');
+function showSkAll() { const n = skNew().length, b = $('skall'); b.hidden = !n; b.textContent = '⟳ 更新ありの ' + n + ' 件をまとめて更新'; }
+$('skall').onclick = async () => {
+  const names = skNew(); if (!names.length) return;
+  const label = k => (skillData.find(g => g.name.toLowerCase() === k) || { name: k }).name;
+  if (!await askOk('更新ありのスキル ' + names.length + ' 件を、取得元の最新版に更新しますか?\n' + names.map(label).join('、') + '\n今のフォルダは data/skill-backups に退避してから入れ替えます。ダウンロードした内容は、入れ替える前に中身を確認できません。')) return;
+  const b = $('skall'), info = $('skchkinfo'); b.disabled = true; let ok = 0; const bad = [];
+  for (const k of names) {
+    info.style.color = ''; info.textContent = '更新中… ' + (ok + bad.length + 1) + '/' + names.length + ' ' + label(k);
+    try { const r = await api('POST', '/api/skills/update', { name: label(k), sid: cur || '' }); if (r.errors && r.errors.length) bad.push(label(k) + '(' + r.errors[0] + ')'); else { ok++; skChk[k] = { status: 'same', text: '更新しました' }; } }
+    catch (e) { bad.push(label(k) + '(' + (e.message || e) + ')'); }
+  }
+  b.disabled = false; showSkAll(); await loadSkills();
+  info.style.color = bad.length ? '#ef4444' : '#16a34a';
+  info.textContent = ok + ' 件を更新しました' + (bad.length ? '。失敗: ' + bad.join(' / ') : '');
+};
 const skMsg = {}; // スキル名(小文字) → { cls, text }。一覧を描き直しても更新結果を残す
 $('sklist').onclick = async e => {
   const d = e.target.closest('.d'); if (d) { d.closest('.sk').classList.toggle('open'); return; }
@@ -2318,7 +2393,7 @@ function upsert(sm) { const i = sessions.findIndex(x => x.id === sm.id); if (i >
 // 完了音: WebAudioで合成(素材ファイル不要)。設定は端末ごとに localStorage
 const SND = { kind: 'chime', when: 'other', vol: 30, vib: false, notif: false, prev: true, mute: [] };
 // ===== 見た目テーマ(設定はこの端末の localStorage。背景の画像/動画ファイルだけサーバーの data/theme/) =====
-const THEME_DEF = { preset: 'auto', bg: '', side: '', me: '', bot: '', font: '', fontFile: '', hl: true, size: 14, media: '', dim: 35, blur: 0 };
+const THEME_DEF = { preset: 'auto', bg: '', side: '', me: '', bot: '', font: '', fontFile: '', hl: true, size: 14, ui: 100, media: '', dim: 35, blur: 0 };
 const THEME_PRESETS = [
   { k: 'auto', n: 'いまのまま', c: null },
   { k: 'line', n: 'LINE風', c: { bg: '#7494c0', side: '#ffffff', me: '#8de055', bot: '#ffffff' } },
@@ -2378,6 +2453,7 @@ function applyTheme() {
   if (ff) c += '@font-face{font-family:"VCFont";src:url("/theme-font/' + ff + '");font-display:swap}html body{font-family:"VCFont","Yu Gothic UI","Meiryo",sans-serif}';
   else if (font) c += 'html body{font-family:' + font + ',"Yu Gothic UI","Meiryo",sans-serif}';
   const size = +t.size; if (size >= 12 && size <= 22 && size !== 14) c += '.bub,#inp{font-size:' + size + 'px}';
+  const ui = +t.ui; if (ui >= 80 && ui <= 200 && ui !== 100) c += '@media (min-width:761px){html{zoom:' + ui / 100 + '}}'; // PCだけ。スマホ幅には効かせない
   let st = document.getElementById('themecss'); if (!st) { st = document.createElement('style'); st.id = 'themecss'; document.head.appendChild(st); }
   st.textContent = c;
   bgLayer($('bgg'), gmedia, t); // 全体: 画面いっぱい(サイドバーの後ろも)
@@ -2399,6 +2475,7 @@ function renderThemeUI() {
   const fs = $('th-font'); if (!fs.options.length) for (const [val, n] of THEME_FONTS) fs.add(new Option(n, val));
   const known = THEME_FONTS.some(f => f[0] === t.font); fs.value = known ? t.font : ''; $('th-fontx').value = known ? '' : t.font;
   $('th-hl').checked = t.hl !== false;
+  $('th-ui').value = t.ui || 100; $('th-uiv').textContent = (t.ui || 100) + '%' + ((t.ui || 100) === 100 ? '(標準)' : '');
   $('th-size').value = t.size; $('th-sizev').textContent = t.size + 'px' + (+t.size === 14 ? '(標準)' : '');
   if (bgScope === 'chat' && !cur) bgScope = 'all';
   const g = bgGet(), cs0 = cur && sessions.find(x => x.id === cur);
@@ -2411,7 +2488,8 @@ for (const k of ['bg', 'side', 'me', 'bot']) $('th-' + k).oninput = ev => { THEM
 $('th-font').onchange = () => { THEME.font = $('th-font').value; THEME.fontFile = ''; $('th-fontx').value = ''; saveTheme(); loadThemeFonts(); };
 $('th-fontx').oninput = () => { THEME.font = $('th-fontx').value; THEME.fontFile = ''; if ($('th-fontx').value) $('th-font').value = ''; saveTheme(); loadThemeFonts(); };
 $('th-hl').onchange = () => { THEME.hl = $('th-hl').checked; saveTheme(); if (cur) openChat(cur); };
-$('th-size').oninput = () => { THEME.size = +$('th-size').value; $('th-sizev').textContent = THEME.size + 'px' + (THEME.size === 14 ? '(標準)' : ''); saveTheme(); };
+$('th-ui').oninput = () => { THEME.ui = +$('th-ui').value; $('th-uiv').textContent = THEME.ui + '%' + (THEME.ui === 100 ? '(標準)' : ''); saveTheme(); };
+$('th-size').oninput =() => { THEME.size = +$('th-size').value; $('th-sizev').textContent = THEME.size + 'px' + (THEME.size === 14 ? '(標準)' : ''); saveTheme(); };
 $('th-dim').oninput = () => { const d = +$('th-dim').value; $('th-dimv').textContent = d + '%'; bgSet({ dim: d }); };
 $('th-blur').oninput = () => { const d = +$('th-blur').value; $('th-blurv').textContent = d + 'px'; bgSet({ blur: d }); };
 $('th-off').onclick = () => { bgSet({ media: '' }); loadThemeBgs(); };
@@ -2479,8 +2557,13 @@ async function loadThemeBgs() {
 }
 setSTab(localStorage.stab || 'conn'); // テーマの定数より後で呼ぶ(前回のタブが「見た目」のとき初期化前参照になる)
 try { Object.assign(SND, JSON.parse(localStorage.snd || '{}')); } catch {}
+if (!SND.half) { SND.vol = Math.max(5, Math.round(SND.vol / 2 / 5) * 5); SND.half = true; try { localStorage.snd = JSON.stringify(SND); } catch {} } // 通知音を一度だけ半分にする(この端末の保存値を引き継いで)
 let actx = null;
-const unlockAudio = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch {} };
+// 音の出力先: 空=OS の既定。setSinkId が使えるのは Chromium 系(Brave・Chrome・Edge)の、localhost か https で開いたときだけ
+const OUT = { id: '' }; try { Object.assign(OUT, JSON.parse(localStorage.audioOut || '{}')); } catch {}
+const canSink = () => window.isSecureContext && typeof HTMLMediaElement !== 'undefined' && 'setSinkId' in HTMLMediaElement.prototype;
+const sinkTo = el => (OUT.id && el && el.setSinkId) ? Promise.resolve(el.setSinkId(OUT.id)).catch(() => {}) : Promise.resolve();
+const unlockAudio = () => { try { if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); sinkTo(actx); } if (actx.state === 'suspended') actx.resume(); } catch {} };
 ['pointerdown', 'keydown', 'touchend'].forEach(n => window.addEventListener(n, unlockAudio, { passive: true }));
 const SOUNDS = { // [周波数Hz, 開始秒, 長さ秒]
   chime: [[784, 0, .5], [1047, .13, .7]], ding: [[880, 0, .6]], pop: [[420, 0, .09], [640, .06, .12]],
@@ -2492,7 +2575,7 @@ const SQUARE = { game: 1 };
 let customAudio = null;
 function playCustom(vol) {
   const d = localStorage.sndfile; if (!d) return toast('音ファイルが選ばれていません');
-  try { if (!customAudio || customAudio.dataset.d !== d) { customAudio = new Audio(d); customAudio.dataset.d = d; } customAudio.volume = Math.min(1, Math.max(0, (vol == null ? SND.vol : vol) / 100)); customAudio.currentTime = 0; customAudio.play().catch(() => {}); } catch {}
+  try { if (!customAudio || customAudio.dataset.d !== d) { customAudio = new Audio(d); customAudio.dataset.d = d; } customAudio.volume = Math.min(1, Math.max(0, (vol == null ? SND.vol : vol) / 100)); customAudio.currentTime = 0; sinkTo(customAudio).then(() => customAudio.play()).catch(() => {}); } catch {}
 }
 function playSound(kind, vol) {
   kind = kind || SND.kind; if (kind === 'custom') return playCustom(vol); const seq = SOUNDS[kind]; if (!seq) return;
@@ -2558,6 +2641,7 @@ async function ttsLoop(q) {
         const upd = () => { const f = a.duration > 0 ? a.currentTime / a.duration : 0; let j = 0, acc = ws[0]; while (j < ws.length - 1 && acc / tot <= f) acc += ws[++j]; if (j !== last && it.sub.rng[j]) { last = j; ttsMark(it.sub.rng[j]); } };
         upd(); ttsTm = setInterval(upd, 120);
       }
+      await sinkTo(a); if (q.id !== ttsRun) return;
       await new Promise((ok, ng) => { a.onended = ok; a.onerror = () => ng(new Error('再生できませんでした')); a.play().catch(ng); });
       clearInterval(ttsTm); URL.revokeObjectURL(a.src); if (q.id !== ttsRun) return;
     }
@@ -2611,6 +2695,27 @@ function ttsBtn(m) {
 function ttsAuto(sid) {
   if (!TTS.on || !TTS.auto || (TTS.scope === 'cur' && sid !== cur) || (SND.mute || []).includes(sid)) return;
   const t = lastAsst[sid]; if (t) ttsSpeak(t, null, sid === cur ? [...$('msgs').querySelectorAll('.row.bot')].pop() : null);
+}
+function initOutUi() {
+  const sel = $('out-dev'), msg = $('out-msg'), names = $('out-names');
+  if (!canSink()) { sel.innerHTML = '<option>切り替えられません</option>'; sel.disabled = true; $('out-reload').disabled = $('out-test').disabled = true; msg.textContent = 'この開き方では切り替えられません(Brave・Chrome・Edge で、localhost か https で開いたときだけ使えます)'; return; }
+  const apply = () => { sinkTo(actx); if (customAudio) sinkTo(customAudio); };
+  const load = async () => {
+    let list = []; try { list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput'); } catch {}
+    const blank = list.length > 0 && list.every(d => !d.label);
+    names.hidden = !blank;
+    sel.innerHTML = '<option value="">OSの既定のデバイス</option>' + list.filter(d => d.deviceId !== 'default' && d.deviceId !== 'communications').map((d, i) => '<option value="' + d.deviceId.replace(/"/g, '') + '">' + (d.label || ('出力デバイス ' + (i + 1))).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]) + '</option>').join('');
+    sel.value = OUT.id; if (sel.value !== OUT.id) { sel.value = ''; if (OUT.id) msg.textContent = '前に選んだデバイスが見つかりません(既定に戻しています)'; }
+  };
+  sel.onchange = () => { OUT.id = sel.value; localStorage.audioOut = JSON.stringify(OUT); apply(); msg.textContent = sel.value ? '切り替えました' : 'OSの既定に戻しました'; playSound(SND.kind === 'off' ? 'chime' : SND.kind); };
+  $('out-reload').onclick = load;
+  $('out-test').onclick = () => playSound(SND.kind === 'off' ? 'chime' : SND.kind, SND.vol);
+  names.onclick = async () => { // デバイス名は、マイクの許可を一度出すまでブラウザが隠す。許可を取ったらすぐ止める(録音はしない)
+    try { const st = await navigator.mediaDevices.getUserMedia({ audio: true }); st.getTracks().forEach(t => t.stop()); } catch { msg.textContent = 'マイクの許可が出なかったため、名前は表示できません(切り替えは使えます)'; return; }
+    load();
+  };
+  navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener('devicechange', load); // ヘッドホンの抜き差しで一覧を更新
+  $('setbtn').addEventListener('click', load); load(); apply();
 }
 function initTtsUi() {
   const save = () => {
@@ -2683,7 +2788,7 @@ function initSoundUi() {
   $('snd-mutes').onclick = () => { SND.mute = []; save(); renderMuteList(); };
   $('snd-test').onclick = () => { save(); if (SND.kind === 'off') return toast('「鳴らさない」になっています'); playSound(); if (SND.vib && navigator.vibrate) navigator.vibrate(120); };
 }
-initSoundUi(); initTtsUi(); initMemoUi();
+initSoundUi(); initOutUi(); initTtsUi(); initMemoUi();
 function connect() {
   const es = new EventSource('/api/events');
   es.onmessage = e => {

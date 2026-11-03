@@ -72,7 +72,7 @@ const validIcon = v => typeof v === 'string' && v.length <= 200000 && (/^data:im
 const ttsAgent = new http.Agent({ keepAlive: true, maxSockets: 4 });
 const procs = new Map(); // sid -> child
 const tasksLib = require('./lib/tasks');
-const skillsLib = require('./lib/skills'), srcLib = require('./lib/skillsrc');
+const skillsLib = require('./lib/skills'), srcLib = require('./lib/skillsrc'), previewLib = require('./lib/preview');
 let tasksBusy = false, tasksPrev = null, tasksAt = 0, tasksLast = [];
 let procsPrev = null, procsAt = 0, procsLast = { groups: [], total: {} };
 
@@ -212,7 +212,7 @@ function onGithub(cwd) {
 const ctxMaxOf = s => s.ctxMax || (/\[1m\]/i.test(s.model || '') || (s.ctx || 0) > 200000 ? 1000000 : 200000); // 実測(resultのcontextWindow)優先、なければ推定
 const BG_TPL_RE = /^@(aurora|sunset|stars|ocean|rain|lava|sakura)$/; // 組み込みの背景テンプレート(ファイルなし)
 const validBgm = o => (o && (themeLib.NAME_RE.test(String(o.media || '')) || BG_TPL_RE.test(String(o.media || '')))) ? { media: o.media, dim: Math.min(80, Math.max(0, +o.dim || 0)), blur: Math.min(20, Math.max(0, +o.blur || 0)) } : null; // この会話だけの背景(null=全体の設定を使う)
-const summary = s => ({ wt: s.wt ? { branch: s.wt.branch, from: s.wt.from } : null, bgm: s.bgm || null, ctxMax: ctxMaxOf(s), gh: onGithub(effCwd(s)) || '', proj: isRootDir(s.cwd) ? inferProj(s) : '', id: s.id, lineage: s.lineage || '', name: s.name, pinned: !!s.pinned, done: !!s.done, fmt: fmtOn(s), yomiyasu: !!s.yomiyasu, group: s.group || '', order: s.order, bg: s.bg || '', tool: s.tool, conn: s.conn || '', connName: s.tool === 'ext' ? ((conns.get(s.conn) || {}).name || '(削除された接続)') : '', cwd: s.cwd, perm: s.perm, color: s.color || '', icon: icons.urlOf(s.icon), mcp: s.mcp || 'auto', mcpOn: mcpOn(s), effort: s.effort || '', ctx: s.ctx || 0, lastEnd: s.lastEnd || 0, model: s.model || '', modelUsed: s.modelUsed || '', queued: (s.queue || []).length, running: !!s.running, startedAt: s.running ? (s.startedAt || 0) : 0, avgMs: (s.durs && s.durs.length) ? Math.round(s.durs.reduce((a, b) => a + b, 0) / s.durs.length) : 0, updatedAt: s.updatedAt, last: lastText(s) });
+const summary = s => ({ wt: s.wt ? { branch: s.wt.branch, from: s.wt.from } : null, bgm: s.bgm || null, ctxMax: ctxMaxOf(s), gh: onGithub(effCwd(s)) || '', proj: isRootDir(s.cwd) ? inferProj(s) : '', id: s.id, lineage: s.lineage || '', name: s.name, pinned: !!s.pinned, done: !!s.done, fmt: fmtOn(s), auto: s.auto || null, yomiyasu: !!s.yomiyasu, group: s.group || '', order: s.order, bg: s.bg || '', tool: s.tool, conn: s.conn || '', connName: s.tool === 'ext' ? ((conns.get(s.conn) || {}).name || '(削除された接続)') : '', cwd: s.cwd, perm: s.perm, color: s.color || '', icon: icons.urlOf(s.icon), mcp: s.mcp || 'auto', mcpOn: mcpOn(s), effort: s.effort || '', ctx: s.ctx || 0, lastEnd: s.lastEnd || 0, model: s.model || '', modelUsed: s.modelUsed || '', queued: (s.queue || []).length, running: !!s.running, startedAt: s.running ? (s.startedAt || 0) : 0, avgMs: (s.durs && s.durs.length) ? Math.round(s.durs.reduce((a, b) => a + b, 0) / s.durs.length) : 0, updatedAt: s.updatedAt, last: lastText(s) });
 function addMsg(s, role, text, images, extra) {
   const m = { id: crypto.randomUUID().slice(0, 8), role, text, ts: Date.now(), ...(extra || {}) };
   if (images && images.length) m.images = images;
@@ -359,9 +359,10 @@ function finishHandoff(s) {
   save();
 }
 function endTurn(s, code, err) {
+  s._stallN = 0;
   s._live = ''; s.lastEnd = Date.now();
   if (s._done && !s._stopped && s.startedAt) s.durs = (s.durs || []).concat(Date.now() - s.startedAt).slice(-10);
-  if (s._stopped) { s._stopped = false; s._stopped_q = true; addMsg(s, 'sys', '停止しました' + ((s.queue || []).length ? '(待機中の ' + s.queue.length + ' 件は破棄)' : '')); }
+  if (s._stopped) { s._stopped = false; s._stopped_q = true; if (s.auto && s.auto.on) { s.auto.on = false; s._autoOff = true; } addMsg(s, 'sys', '停止しました' + (s._autoOff ? '(自動継続も解除)' : '') + ((s.queue || []).length ? '(待機中の ' + s.queue.length + ' 件は破棄)' : '')); }
   else if (!s._done && !s.messages.length && /is not recognized|not found|認識されていません|見つかりません|ENOENT/i.test(err || '')) addMsg(s, 'sys', `${s.tool === 'codex' ? 'Codex' : 'Claude Code'} がこのPCで見つかりません。
 ・入れていない場合: README の「必要なもの」を見て、インストールしてログインしてください。
 ・入れているのに出る場合: PowerShell で ${s.tool === 'codex' ? 'codex' : 'claude'} --version が動くか確認してください。
@@ -375,6 +376,24 @@ function endTurn(s, code, err) {
   const q = s.queue || []; s.queue = [];
   if (s._stopped_q) { s._stopped_q = false; q.length = 0; }
   if (q.length) { setTimeout(() => { if (!s.running && find(s.id)) send(s, q.map(x => x.text).join('\n\n'), q.flatMap(x => x.images)); }, 100); }
+  else if (s.auto && s.auto.on) autoNext(s);
+  s._autoOff = false;
+}
+// 自動継続: AIが返答を終えたとき、まだ終わっていなければ「続けて」と自動で送る。最後の行が【完了】になるか、回数の上限に達したら止める
+const AUTO_PROMPT = '目標がまだ達成できていなければ、確認や報告で止まらずに続けてください。完全に達成できて、これ以上やることがないときだけ、返事の最後の行に【完了】とだけ書いてください。';
+function autoNext(s) {
+  const a = s.auto; if (!a || !a.on) return;
+  const off = why => { a.on = false; addMsg(s, 'sys', '🔁 自動継続を終了しました: ' + why); save(); broadcast({ type: 'state', sid: s.id, summary: summary(s) }); };
+  if (!s._done) return off('AIが途中で終了したため');
+  const last = [...s.messages].reverse().find(m => m.role === 'assistant');
+  if (last && /【完了】\s*$/.test(String(last.text || ''))) return off('AIが【完了】と報告しました(' + a.n + '回続けました)');
+  if (a.n >= a.max) return off('上限の ' + a.max + ' 回に達しました');
+  setTimeout(() => {
+    if (!s.auto || !s.auto.on || s.running || s._ck || !find(s.id) || (s.queue || []).length) return;
+    a.n++; const t = a.prompt || AUTO_PROMPT;
+    addMsg(s, 'user', '🔁 自動継続 ' + a.n + '/' + a.max + '\n' + t); send(s, t);
+    broadcast({ type: 'state', sid: s.id, summary: summary(s) });
+  }, 3000);
 }
 
 // トークン節約: 自動compactを20万で発動(既定は約97万まで膨らむ) + キャッシュ保持1時間
@@ -505,6 +524,18 @@ function sendClaude(s, text) {
   child.stdin.write(JSON.stringify({ type: 'user', message: { role: 'user', content: text } }) + '\n');
 }
 
+const CODEX_STALL_MS = 2 * 60e3;
+// pid の下で動いているプロセス(Codexが走らせたコマンドなど)があるか。長いコマンドの待ちと、通信待ちの固まりを見分ける
+function hasDescendants(pid) {
+  return new Promise(resolve => {
+    const ps = "$a=Get-CimInstance Win32_Process;$q=@(" + Number(pid) + ");$n=0;while($q.Count){$c=$q[0];$q=$q[1..($q.Count)];$k=@($a|?{$_.ParentProcessId -eq $c -and $_.Name -ne 'conhost.exe'});$n+=$k.Count;$q+=@($k|%{$_.ProcessId})};$n";
+    execFile('powershell', ['-NoProfile', '-Command', ps], { windowsHide: true, timeout: 15000 }, (e, out) => {
+      const n = parseInt(String(out).trim(), 10);
+      resolve(isNaN(n) ? true : n > 2); // 失敗したときは「動いている」として何もしない。node(npmの起動役)→codex.exe の2つは数えない
+    });
+  });
+}
+
 function sendCodex(s, text, files) {
   if (!prefs.mcpAsk && (s.mcp || 'auto') === 'auto' && !s.mcpOn && MCP_RE.test(text)) { s.mcpOn = true; addMsg(s, 'sys', mcpWord(text) + ' を検知したため、この会話のMCPを有効にしました(以降も有効のまま。設定で変更可)'); }
   beginTurn(s);
@@ -537,12 +568,31 @@ function sendCodex(s, text, files) {
   });
   child.stderr.on('data', d => { err += d.toString('utf8'); if (err.length > 4000) err = err.slice(-4000); });
   child.on('error', e => addMsg(s, 'sys', '起動失敗: ' + e.message));
-  let fin = false;
+  let fin = false, lastAct = Date.now();
+  child.stdout.on('data', () => { lastAct = Date.now(); });
+  child.stderr.on('data', () => { lastAct = Date.now(); });
+  // 見張り: 出力が2分なく、Codexの下で動いているコマンドもなければ、OpenAI側の通信待ちで固まっている。止めて、同じ会話の続きから自動で再開する(最大2回)
+  const dog = setInterval(() => {
+    if (fin) return clearInterval(dog);
+    if (Date.now() - lastAct < CODEX_STALL_MS) return;
+    lastAct = Date.now() - CODEX_STALL_MS + 30000; // 次の確認は30秒後
+    hasDescendants(child.pid).then(busy => {
+      if (fin || busy || child.stall) return;
+      if ((s._stallN || 0) >= 2) { lastAct = Date.now() + 10 * 60e3; addMsg(s, 'sys', 'Codexの応答が止まったままです(自動再開は2回までなので、停止してから送り直してください)'); return; }
+      s._stallN = (s._stallN || 0) + 1; child.stall = true;
+      addMsg(s, 'sys', `Codexの応答が${Math.round(CODEX_STALL_MS / 60000)}分以上ありません(OpenAI側の通信が固まった可能性)。止めて続きから再開します(${s._stallN}/2)`);
+      killTree(child); setTimeout(child.forceEnd, 2500);
+    });
+  }, 20000);
   const finish = code => {
-    if (fin) return; fin = true;
+    if (fin) return; fin = true; clearInterval(dog);
     if (buf) onLine(buf);
     if (procs.get(s.id) === child) procs.delete(s.id);
     broadcast({ type: 'limits', limits: limits() });
+    if (child.stall && !s._stopped && s.nativeId) { // 見張りで止めた: 実行中のまま、続きから再開(待機中のメッセージはそのまま残る)
+      setTimeout(() => { if (find(s.id) && !procs.has(s.id)) sendCodex(s, '通信が途切れて中断されました。直前の作業の続きから、状況を確認して再開してください(やり終えたことをやり直さないこと)。', []); }, 500);
+      return;
+    }
     endTurn(s, code, err);
   };
   child.on('close', finish);
@@ -861,7 +911,7 @@ const server = http.createServer(async (req, res) => {
         limiter.fail(ip);
         return json(res, { error: '合言葉が違います' }, 401);
       }
-      if (!safeEq(cookieOf(req, 'cc_auth'), authToken())) {
+      if (!p.startsWith('/pv/') && !safeEq(cookieOf(req, 'cc_auth'), authToken())) { // /pv/ は、枠の中のページがクッキーを送れないので、URLの署名で確かめる(下)
         if (req.method === 'GET' && !p.startsWith('/api/')) { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return res.end(LOGIN_HTML); }
         return json(res, { error: '認証が必要です' }, 401);
       }
@@ -1070,7 +1120,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     // スキルの一覧(Claude Code / Codex のどちらで使えるかのタグつき)と、もう一方のツールへのコピー(画面専用)
-    if (p === '/api/skills' || p === '/api/skills/copy' || p === '/api/skills/update' || p === '/api/skills/source') {
+    if (p === '/api/skills' || p === '/api/skills/copy' || p === '/api/skills/update' || p === '/api/skills/source' || p === '/api/skills/check') {
       if (!local) return json(res, { error: 'forbidden' }, 403);
       if (uiOnly(req, res)) return;
       const home = require('os').homedir();
@@ -1095,6 +1145,34 @@ const server = http.createServer(async (req, res) => {
           g.updatedBy = g.places.some(x => x.src && x.src.updatedAt) ? 'button' : 'file';
         }
         return json(res, { skills: groups, cwd });
+      }
+      // 全スキルの更新チェック。確認だけで何も入れ替えない。{ results: { 名前(小文字): { status: 'new'|'same'|'unknown'|'none'|'error', text } } }
+      if (p === '/api/skills/check' && req.method === 'POST') {
+        const b = await body(req), cwd = cwdOf(b.sid), results = {}, shaCache = new Map();
+        const latestSha = repo => { if (!shaCache.has(repo)) shaCache.set(repo, srcLib.resolveSha(repo).then(v => ({ v }), e => ({ e }))); return shaCache.get(repo); };
+        const names = new Map();
+        for (const x of skillsLib.scan(home, cwd)) { const k = x.name.toLowerCase(); if (!names.has(k)) names.set(k, []); names.get(k).push(x); }
+        if (!names.has('yomiyasu')) names.set('yomiyasu', []);
+        for (const [k, places] of names) {
+          const srcs = places.map(x => ({ x, src: srcLib.readSource(x.dir) })).filter(t => t.src);
+          if (k === 'yomiyasu' && !srcs.some(t => t.src.kind === 'release')) srcs.push({ x: null, src: { kind: 'release', repo: yy.REPO } });
+          if (!srcs.length) { results[k] = { status: 'none', text: '取得元が未設定のため確認できません' }; continue; }
+          let st = 'same', text = '最新です';
+          for (const { x, src } of srcs) {
+            try {
+              if (src.kind === 'release') { const tag = await yy.latestTag(); if (yy.cmpVer(tag, yy.versionOf(yySrc())) > 0) { st = 'new'; text = '新しい版があります(' + tag + ')'; } }
+              else if (src.kind === 'git') { const r = await srcLib.checkGit(x.dir); if (!r.same) { st = 'new'; text = '新しい版があります'; } }
+              else {
+                const r = await latestSha(src.repo); if (r.e) throw r.e;
+                if (!src.sha) { if (st === 'same') { st = 'unknown'; text = '今の版が未確認です(更新すると最新版に入れ替わります)'; } }
+                else if (src.sha !== r.v) { st = 'new'; text = '新しい版があります'; }
+              }
+            } catch (e) { if (st === 'same' || st === 'unknown') { st = 'error'; text = String(e.message || e).slice(0, 120); } }
+            if (st === 'new') break;
+          }
+          results[k] = { status: st, text };
+        }
+        return json(res, { ok: true, results, at: Date.now() });
       }
       if (p === '/api/skills/source' && req.method === 'POST') {
         const b = await body(req), cwd = cwdOf(b.sid), repo = srcLib.parseRepo(b.url);
@@ -1377,6 +1455,11 @@ const server = http.createServer(async (req, res) => {
         if (b.effort !== undefined) s.effort = validEffort(b.effort);
         if (b.perm) s.perm = (b.perm === 'full' && isLocal(req)) ? 'full' : 'safe';
         if (typeof b.fmt === 'boolean') s.fmt = b.fmt;
+        if (b.auto !== undefined) { // 自動継続: スマホからも設定できる(ふつうの送信と同じ、ログイン済みの操作)
+          const x = b.auto || {}, was = !!(s.auto && s.auto.on);
+          s.auto = { on: !!x.on, max: Math.min(500, Math.max(1, Math.round(Number(x.max)) || 30)), prompt: String(x.prompt || '').trim().slice(0, 1000), n: was && x.on ? s.auto.n : 0 };
+          if (s.auto.on && !was && !s.running && !s._ck) { s._done = true; setTimeout(() => autoNext(s), 0); }
+        }
         const note = b.yomiyasu === true ? installYomiyasu(s) : b.yomiyasu === false ? removeYomiyasu(s) : '';
         save(); broadcast({ type: 'state', sid: s.id, summary: summary(s) });
         return json(res, { ...summary(s), note });
@@ -1588,6 +1671,37 @@ const server = http.createServer(async (req, res) => {
       if (r === 'bad') { res.writeHead(416, { 'content-range': 'bytes */' + st.size }); return res.end(); }
       if (r) { res.writeHead(206, { ...hd, 'content-range': 'bytes ' + r.start + '-' + r.end + '/' + st.size, 'content-length': r.end - r.start + 1 }); return pipeFile(res, fs.createReadStream(f, r)); }
       res.writeHead(200, { ...hd, 'content-length': st.size }); return pipeFile(res, fs.createReadStream(f));
+    }
+    // AIが会話で挙げた画像・PDF・HTMLの表示用(その会話に書かれたパスだけ)
+    if ((req.method === 'GET' || req.method === 'HEAD') && p === '/api/preview') {
+      const s = find(u.searchParams.get('sid') || '');
+      if (!s) return json(res, { error: '会話が見つかりません' }, 404);
+      const r = previewLib.resolve(u.searchParams.get('path'), s.cwd && fs.existsSync(s.cwd) ? s.cwd : '', s.messages.map(m => String(m.text || '')));
+      if (r.error) return json(res, { error: r.error }, r.code);
+      for (const [k, v] of Object.entries(previewLib.headers(r))) res.setHeader(k, v);
+      res.writeHead(200);
+      return req.method === 'HEAD' ? res.end() : pipeFile(res, fs.createReadStream(r.file));
+    }
+    // HTMLのプレビュー用リンク。そのHTMLのあるフォルダを署名つきURLにして返す(同じフォルダの画像・CSS・別のHTMLも読めるように)
+    if (req.method === 'GET' && p === '/api/preview-link') {
+      const s = find(u.searchParams.get('sid') || '');
+      if (!s) return json(res, { error: '会話が見つかりません' }, 404);
+      const r = previewLib.resolve(u.searchParams.get('path'), s.cwd && fs.existsSync(s.cwd) ? s.cwd : '', s.messages.map(m => String(m.text || '')));
+      if (r.error) return json(res, { error: r.error }, r.code);
+      if (r.kind !== 'html') return json(res, { error: 'HTML ではありません' }, 400);
+      return json(res, { url: '/pv/' + previewLib.makeToken(AUTH.secret, previewLib.dirOf(r.file)) + '/' + encodeURIComponent(path.basename(r.file)) });
+    }
+    if ((req.method === 'GET' || req.method === 'HEAD') && p.startsWith('/pv/')) {
+      const parts = p.split('/').slice(2); let segs;
+      const dir = previewLib.parseToken(AUTH.secret, parts.shift());
+      try { segs = parts.map(decodeURIComponent); } catch { segs = []; }
+      if (!dir) { res.writeHead(403); return res.end(); }
+      const r = previewLib.resolveIn(dir, segs);
+      if (r.error) return json(res, { error: r.error }, r.code);
+      for (const [k, v] of Object.entries(previewLib.headers(r))) res.setHeader(k, v);
+      res.setHeader('access-control-allow-origin', '*'); // 枠の中のページ(出どころ不明扱い)がフォントなどを読めるように。URLの署名が通行証なので他は開かない
+      res.writeHead(200);
+      return req.method === 'HEAD' ? res.end() : pipeFile(res, fs.createReadStream(r.file));
     }
     let im;
     if (req.method === 'GET' && (im = p.match(/^\/img\/([\w-]+\.(?:png|jpe?g|webp|gif))$/))) {
