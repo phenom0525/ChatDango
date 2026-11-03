@@ -68,6 +68,6 @@ test('copySkill: もう一方のツールの置き場へコピーする(個人�
   const big = tmp(); put(big, '.claude/skills/big/SKILL.md', '---\nname: big\n---');
   for (let i = 0; i < 501; i++) fs.writeFileSync(path.join(big, '.claude/skills/big', 'f' + i + '.txt'), 'x');
   const be = K.scan(big, null)[0];
-  assert.match(K.copySkill(be, big, null, 'codex').error, /大きすぎ/);
+  const lim = K.LIMIT.files; K.LIMIT.files = 500; try { assert.match(K.copySkill(be, big, null, "codex").error, /大きすぎ/); } finally { K.LIMIT.files = lim; }
   assert.ok(!fs.existsSync(path.join(big, '.agents', 'skills', 'big')));
 });
